@@ -10,288 +10,317 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Clean Light Theme CSS
+# Fixed Light Theme CSS - Proper text colors
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
     
-    /* Base styles */
-    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    /* Reset and base */
+    html, body, [class*="st-"] {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
     
+    /* Main app background */
     .stApp {
-        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        background: #f5f7fa !important;
     }
     
-    /* Hide Streamlit branding */
-    #MainMenu, footer, header {visibility: hidden;}
+    /* Ensure all text is visible - dark text on light background */
+    .stApp, .stApp p, .stApp span, .stApp div, .stApp label {
+        color: #1f2937 !important;
+    }
     
-    /* Header */
-    .header {
-        background: white;
-        padding: 1.5rem 2rem;
+    /* Sidebar styling - ensure visibility */
+    section[data-testid="stSidebar"] {
+        background: #ffffff !important;
+        border-right: 1px solid #e5e7eb !important;
+    }
+    
+    section[data-testid="stSidebar"] * {
+        color: #1f2937 !important;
+    }
+    
+    section[data-testid="stSidebar"] .stMarkdown p,
+    section[data-testid="stSidebar"] .stMarkdown span,
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #1f2937 !important;
+    }
+    
+    /* Header card */
+    .header-card {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        padding: 24px 32px;
         border-radius: 16px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        border: 1px solid #e2e8f0;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     
-    .header h1 {
-        color: #1e293b;
-        font-size: 1.5rem;
+    .header-card h1 {
+        color: #ffffff !important;
+        font-size: 1.75rem;
         font-weight: 700;
         margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
     }
     
-    .header p {
-        color: #64748b;
-        margin: 0.25rem 0 0 0;
-        font-size: 0.9rem;
+    .header-card p {
+        color: rgba(255, 255, 255, 0.9) !important;
+        margin: 8px 0 0 0;
+        font-size: 1rem;
     }
     
-    /* Cards */
-    .card {
-        background: white;
+    /* Content cards */
+    .content-card {
+        background: #ffffff;
         border-radius: 12px;
-        padding: 1.25rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        border: 1px solid #e2e8f0;
-        margin-bottom: 1rem;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
     }
     
     .card-title {
-        color: #475569;
-        font-size: 0.75rem;
+        color: #374151 !important;
+        font-size: 0.875rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        letter-spacing: 0.05em;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
     }
     
-    /* State Grid - Responsive */
+    /* State grid */
     .state-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-        gap: 8px;
+        grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+        gap: 10px;
     }
     
-    .state-item {
-        background: #f8fafc;
-        border: 2px solid #e2e8f0;
+    .state-box {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
         border-radius: 10px;
-        padding: 12px 8px;
+        padding: 14px 8px;
         text-align: center;
         transition: all 0.2s ease;
     }
     
-    .state-item.active {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
+    .state-box.active {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
         border-color: #3b82f6;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
     }
     
-    .state-item .name {
-        font-size: 0.7rem;
+    .state-box .name {
+        font-size: 0.75rem;
         font-weight: 600;
-        color: #334155;
+        color: #374151 !important;
     }
     
-    .state-item.active .name {
-        color: white;
+    .state-box.active .name {
+        color: #ffffff !important;
     }
     
-    .state-item .id {
-        font-size: 0.6rem;
-        color: #94a3b8;
-        margin-top: 2px;
+    .state-box .id {
+        font-size: 0.65rem;
+        color: #9ca3af !important;
+        margin-top: 4px;
     }
     
-    .state-item.active .id {
-        color: rgba(255,255,255,0.8);
+    .state-box.active .id {
+        color: rgba(255, 255, 255, 0.85) !important;
     }
     
-    /* Registers */
-    .reg-grid {
+    /* Register display */
+    .reg-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
+        gap: 10px;
     }
     
-    .reg-item {
-        background: #f8fafc;
-        border-radius: 8px;
-        padding: 12px;
+    .reg-box {
+        background: #f9fafb;
+        border-radius: 10px;
+        padding: 14px;
         text-align: center;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
     }
     
     .reg-label {
-        font-size: 0.7rem;
-        color: #64748b;
+        font-size: 0.75rem;
+        color: #6b7280 !important;
         font-weight: 500;
     }
     
     .reg-value {
         font-family: 'Fira Code', monospace;
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         font-weight: 600;
-        color: #3b82f6;
+        color: #3b82f6 !important;
         margin-top: 4px;
     }
     
-    /* Signals */
-    .signal-item {
+    /* Signal rows */
+    .signal-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 8px 12px;
-        background: #f8fafc;
-        border-radius: 6px;
-        margin-bottom: 4px;
-        border-left: 3px solid #e2e8f0;
+        padding: 10px 14px;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-bottom: 6px;
+        border-left: 4px solid #e5e7eb;
     }
     
-    .signal-item.active {
+    .signal-row.high {
         border-left-color: #10b981;
         background: #ecfdf5;
     }
     
     .signal-name {
         font-family: 'Fira Code', monospace;
-        font-size: 0.8rem;
-        color: #475569;
+        font-size: 0.85rem;
+        color: #374151 !important;
     }
     
-    .signal-val {
+    .signal-value {
         font-family: 'Fira Code', monospace;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 4px;
-        background: #e2e8f0;
-        color: #64748b;
+        padding: 3px 10px;
+        border-radius: 6px;
+        background: #e5e7eb;
+        color: #6b7280 !important;
     }
     
-    .signal-val.high {
+    .signal-value.high {
         background: #10b981;
-        color: white;
+        color: #ffffff !important;
     }
     
-    /* Console */
-    .console {
-        background: #f8fafc;
-        border-radius: 8px;
-        padding: 12px;
+    /* Console log */
+    .console-box {
+        background: #1f2937;
+        border-radius: 10px;
+        padding: 14px;
         font-family: 'Fira Code', monospace;
-        font-size: 0.75rem;
-        max-height: 180px;
+        font-size: 0.8rem;
+        max-height: 200px;
         overflow-y: auto;
-        border: 1px solid #e2e8f0;
     }
     
-    .log-line { padding: 3px 0; color: #64748b; }
-    .log-info { color: #3b82f6; }
-    .log-success { color: #10b981; }
-    .log-warning { color: #f59e0b; }
+    .log-line {
+        padding: 4px 0;
+        color: #9ca3af !important;
+    }
+    
+    .log-info { color: #60a5fa !important; }
+    .log-success { color: #34d399 !important; }
+    .log-warning { color: #fbbf24 !important; }
     
     /* Team cards */
-    .team-item {
-        background: white;
+    .team-card {
+        background: #ffffff;
         border-radius: 12px;
-        padding: 1.25rem;
+        padding: 24px;
         text-align: center;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
         transition: all 0.2s ease;
     }
     
-    .team-item:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
+    .team-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-4px);
     }
     
-    .team-item .icon { font-size: 2rem; margin-bottom: 8px; }
-    .team-item .name { font-weight: 600; color: #1e293b; font-size: 0.9rem; }
-    .team-item .usn { color: #64748b; font-size: 0.8rem; margin-top: 4px; }
+    .team-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .team-card .name { font-weight: 600; color: #1f2937 !important; font-size: 1rem; }
+    .team-card .usn { color: #6b7280 !important; font-size: 0.875rem; margin-top: 6px; }
     
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-        color: white !important;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+        color: #ffffff !important;
         border: none !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         font-weight: 600 !important;
-        padding: 0.5rem 1rem !important;
-        font-size: 0.85rem !important;
+        padding: 10px 20px !important;
+        font-size: 0.9rem !important;
+        box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25) !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2) !important;
     }
     
     .stButton > button:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
-    }
-    
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: white !important;
-        border-right: 1px solid #e2e8f0 !important;
-    }
-    
-    [data-testid="stSidebar"] .block-container {
-        padding: 1rem !important;
-    }
-    
-    /* Selectbox */
-    .stSelectbox > div > div {
-        background: white !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 8px !important;
-    }
-    
-    /* Metrics */
-    [data-testid="stMetricValue"] {
-        font-family: 'Fira Code', monospace !important;
-        color: #3b82f6 !important;
-    }
-    
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background: white;
-        padding: 8px;
-        border-radius: 10px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 8px !important;
-        padding: 8px 16px !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Table */
-    .dataframe {
-        font-family: 'Fira Code', monospace !important;
-        font-size: 0.8rem !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px rgba(79, 70, 229, 0.35) !important;
     }
     
     /* Status badge */
     .status-badge {
         display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.9rem;
         font-weight: 600;
+        background: #dbeafe;
+        color: #1e40af !important;
     }
     
-    .status-badge.active {
-        background: #dbeafe;
-        color: #1d4ed8;
+    /* Metrics */
+    [data-testid="stMetricValue"] {
+        font-family: 'Fira Code', monospace !important;
+        color: #4f46e5 !important;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        color: #6b7280 !important;
+    }
+    
+    /* Selectbox */
+    .stSelectbox label {
+        color: #374151 !important;
+    }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        background: #ffffff;
+        padding: 8px;
+        border-radius: 12px;
+        gap: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px !important;
+        color: #4b5563 !important;
+        font-weight: 500 !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Tables */
+    .stDataFrame {
+        background: #ffffff !important;
+    }
+    
+    /* Markdown text */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+        color: #1f2937 !important;
+    }
+    
+    .stMarkdown p, .stMarkdown li {
+        color: #374151 !important;
+    }
+    
+    /* Caption text */
+    .stCaption, small {
+        color: #6b7280 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -326,7 +355,7 @@ def reset():
     st.session_state.pc = 0
     st.session_state.signals = {'PCWrite': 0, 'IRWrite': 0, 'MemRead': 0, 'MemWrite': 0, 'RegWrite': 0, 'ALUOp': '00'}
     st.session_state.waveform = []
-    log("Reset complete", 'success')
+    log("Processor reset", 'success')
 
 def next_state(op):
     s = st.session_state.state
@@ -380,77 +409,74 @@ def step(op):
     log(f"{STATES[st.session_state.state]} → {name}")
     apply(op)
     if st.session_state.state == 6:
-        log(f"{name} completed", 'success')
+        log(f"{name} done", 'success')
     nxt = next_state(op)
     if nxt == 7 and st.session_state.state != 7:
-        log("Processor halted", 'warning')
+        log("HALTED", 'warning')
     st.session_state.state = nxt
     st.session_state.cycle += 1
 
-# FSM Diagram - Clean Light Theme
+# FSM Diagram SVG - Clean with visible text
 def fsm_svg():
     c = st.session_state.state
-    active = lambda i: "url(#activeGrad)" if i == c else "#f8fafc"
-    stroke = lambda i: "#3b82f6" if i == c else "#cbd5e1"
-    text_c = lambda i: "white" if i == c else "#475569"
+    fill = lambda i: "#4f46e5" if i == c else "#f3f4f6"
+    stroke = lambda i: "#4f46e5" if i == c else "#d1d5db"
+    txt = lambda i: "#ffffff" if i == c else "#374151"
     
     return f'''
-    <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; overflow: auto;">
-        <svg viewBox="0 0 650 320" style="width: 100%; min-width: 500px; height: auto; display: block;">
+    <div style="background: #ffffff; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; overflow-x: auto;">
+        <svg viewBox="0 0 620 300" style="width: 100%; min-width: 480px; height: auto;">
             <defs>
                 <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                    <polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/>
+                    <polygon points="0 0, 8 3, 0 6" fill="#9ca3af"/>
                 </marker>
-                <linearGradient id="activeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#3b82f6"/>
-                    <stop offset="100%" style="stop-color:#2563eb"/>
-                </linearGradient>
             </defs>
             
             <!-- Arrows -->
-            <path d="M 325 55 L 170 95" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 170 135 L 480 135" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 460 155 L 100 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 480 155 L 250 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 500 155 L 380 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 520 155 L 550 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 100 255 L 300 280" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 250 255 L 310 280" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 380 255 L 340 280" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
-            <path d="M 280 295 Q 60 260 150 155" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arr)"/>
+            <path d="M 310 50 L 160 85" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 160 125 L 460 125" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 440 145 L 90 180" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 460 145 L 230 180" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 480 145 L 360 180" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 500 145 L 530 180" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 90 240 L 280 265" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 230 240 L 295 265" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 360 240 L 320 265" fill="none" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 265 280 Q 50 250 140 145" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arr)"/>
             
             <!-- Labels -->
-            <text x="240" y="70" fill="#94a3b8" font-size="9" font-family="Inter">start</text>
-            <text x="310" y="125" fill="#94a3b8" font-size="8" font-family="Inter">always</text>
-            <text x="250" y="175" fill="#94a3b8" font-size="7" font-family="Inter">ALU</text>
-            <text x="340" y="175" fill="#94a3b8" font-size="7" font-family="Inter">MEM</text>
-            <text x="430" y="175" fill="#94a3b8" font-size="7" font-family="Inter">BR</text>
-            <text x="530" y="175" fill="#94a3b8" font-size="7" font-family="Inter">HALT</text>
+            <text x="225" y="60" fill="#6b7280" font-size="9" font-family="Inter, sans-serif">start</text>
+            <text x="295" y="115" fill="#6b7280" font-size="8" font-family="Inter, sans-serif">always</text>
+            <text x="230" y="165" fill="#6b7280" font-size="8" font-family="Inter, sans-serif">ALU</text>
+            <text x="320" y="165" fill="#6b7280" font-size="8" font-family="Inter, sans-serif">MEM</text>
+            <text x="410" y="165" fill="#6b7280" font-size="8" font-family="Inter, sans-serif">BR</text>
+            <text x="505" y="165" fill="#6b7280" font-size="8" font-family="Inter, sans-serif">HALT</text>
+            <text x="70" y="260" fill="#6b7280" font-size="8" font-family="Inter, sans-serif">loop</text>
             
             <!-- States -->
-            <circle cx="325" cy="35" r="28" fill="{active(0)}" stroke="{stroke(0)}" stroke-width="2"/>
-            <text x="325" y="38" fill="{text_c(0)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">IDLE</text>
+            <circle cx="310" cy="30" r="26" fill="{fill(0)}" stroke="{stroke(0)}" stroke-width="2"/>
+            <text x="310" y="34" fill="{txt(0)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">IDLE</text>
             
-            <circle cx="150" cy="120" r="28" fill="{active(1)}" stroke="{stroke(1)}" stroke-width="2"/>
-            <text x="150" y="123" fill="{text_c(1)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">FETCH</text>
+            <circle cx="140" cy="110" r="26" fill="{fill(1)}" stroke="{stroke(1)}" stroke-width="2"/>
+            <text x="140" y="114" fill="{txt(1)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">FETCH</text>
             
-            <circle cx="500" cy="120" r="28" fill="{active(2)}" stroke="{stroke(2)}" stroke-width="2"/>
-            <text x="500" y="123" fill="{text_c(2)}" font-size="9" font-weight="600" text-anchor="middle" font-family="Inter">DECODE</text>
+            <circle cx="480" cy="110" r="26" fill="{fill(2)}" stroke="{stroke(2)}" stroke-width="2"/>
+            <text x="480" y="114" fill="{txt(2)}" font-size="9" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">DECODE</text>
             
-            <circle cx="80" cy="225" r="28" fill="{active(3)}" stroke="{stroke(3)}" stroke-width="2"/>
-            <text x="80" y="228" fill="{text_c(3)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter">EXE_ALU</text>
+            <circle cx="70" cy="210" r="26" fill="{fill(3)}" stroke="{stroke(3)}" stroke-width="2"/>
+            <text x="70" y="214" fill="{txt(3)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">EXE_ALU</text>
             
-            <circle cx="230" cy="225" r="28" fill="{active(4)}" stroke="{stroke(4)}" stroke-width="2"/>
-            <text x="230" y="228" fill="{text_c(4)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter">EXE_MEM</text>
+            <circle cx="210" cy="210" r="26" fill="{fill(4)}" stroke="{stroke(4)}" stroke-width="2"/>
+            <text x="210" y="214" fill="{txt(4)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">EXE_MEM</text>
             
-            <circle cx="380" cy="225" r="28" fill="{active(5)}" stroke="{stroke(5)}" stroke-width="2"/>
-            <text x="380" y="228" fill="{text_c(5)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter">EXE_BR</text>
+            <circle cx="350" cy="210" r="26" fill="{fill(5)}" stroke="{stroke(5)}" stroke-width="2"/>
+            <text x="350" y="214" fill="{txt(5)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">EXE_BR</text>
             
-            <circle cx="550" cy="225" r="28" fill="{active(7)}" stroke="{'#f59e0b' if c==7 else '#cbd5e1'}" stroke-width="2"/>
-            <text x="550" y="228" fill="{text_c(7)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">HALT</text>
+            <circle cx="530" cy="210" r="26" fill="{fill(7)}" stroke="{'#f59e0b' if c==7 else '#d1d5db'}" stroke-width="2"/>
+            <text x="530" y="214" fill="{txt(7)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">HALT</text>
             
-            <circle cx="325" cy="295" r="28" fill="{active(6)}" stroke="{stroke(6)}" stroke-width="2"/>
-            <text x="325" y="298" fill="{text_c(6)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">WB</text>
+            <circle cx="300" cy="280" r="26" fill="{fill(6)}" stroke="{stroke(6)}" stroke-width="2"/>
+            <text x="300" y="284" fill="{txt(6)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">WB</text>
         </svg>
     </div>
     '''
@@ -459,17 +485,17 @@ def fsm_svg():
 
 # Header
 st.markdown("""
-<div class="header">
+<div class="header-card">
     <h1>⚙️ FSM Processor Control Unit</h1>
     <p>Interactive Finite State Machine Simulator • DDCO Mini Project</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar
+# Sidebar - Always visible
 with st.sidebar:
-    st.markdown("### 🎛️ Controls")
+    st.markdown("### 🎛️ Control Panel")
     
-    instr = st.selectbox("Instruction", list(INSTR.keys()), format_func=lambda x: f"{x} ({INSTR[x]})")
+    instr = st.selectbox("Select Instruction", list(INSTR.keys()), format_func=lambda x: f"{x} ({INSTR[x]})")
     op = INSTR[instr]
     
     c1, c2 = st.columns(2)
@@ -478,66 +504,71 @@ with st.sidebar:
     with c2:
         if st.button("🔄 Reset", use_container_width=True): reset()
     
-    if st.button("▶️ Run Cycle", use_container_width=True):
+    if st.button("▶️ Run Full Cycle", use_container_width=True):
         for _ in range(6):
             if st.session_state.state != 7: step(op)
     
     st.markdown("---")
-    st.markdown("### 📊 Status")
+    
+    st.markdown("### 📊 Processor Status")
     c1, c2 = st.columns(2)
     c1.metric("Cycles", st.session_state.cycle)
     c2.metric("PC", f"0x{st.session_state.pc:02X}")
     
-    st.markdown(f'''<div style="text-align:center; margin-top:8px;">
-        <span class="status-badge active">{STATES[st.session_state.state]}</span>
+    st.markdown(f'''<div style="text-align:center; margin:12px 0;">
+        <span class="status-badge">{STATES[st.session_state.state]}</span>
     </div>''', unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown("### 👥 Team")
-    st.caption("**Vignesh B S** • 1BI24IS187")
-    st.caption("**Rohit Maiya M** • 1BI24IS131")
-    st.caption("**Sartaj Ahmad S** • DIP 14")
+    
+    st.markdown("### 👥 Team Members")
+    st.markdown("**Vignesh B S** — 1BI24IS187")
+    st.markdown("**Rohit Maiya M** — 1BI24IS131")
+    st.markdown("**Sartaj Ahmad S** — DIP 14")
+    
     st.markdown("---")
-    st.caption("**Guide:** Dr. Shilpa M • ISE Dept")
+    
+    st.markdown("### 👨‍🏫 Project Guide")
+    st.markdown("**Dr. Shilpa M**")
+    st.caption("Assistant Professor, ISE Dept")
 
 # Tabs
-tab1, tab2, tab3, tab4 = st.tabs(["🔄 Simulator", "📚 Theory", "💻 Code", "📝 About"])
+tab1, tab2, tab3, tab4 = st.tabs(["🔄 Simulator", "📚 Theory", "💻 Verilog Code", "📝 About"])
 
 with tab1:
     # FSM Diagram
-    st.markdown('<div class="card"><div class="card-title">🔄 FSM State Diagram</div>', unsafe_allow_html=True)
-    components.html(fsm_svg(), height=360, scrolling=True)
+    st.markdown('<div class="content-card"><div class="card-title">🔄 Finite State Machine Diagram</div>', unsafe_allow_html=True)
+    components.html(fsm_svg(), height=340, scrolling=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # States row
-    st.markdown('<div class="card"><div class="card-title">📊 Current States</div><div class="state-grid">', unsafe_allow_html=True)
+    # States
+    st.markdown('<div class="content-card"><div class="card-title">📊 State Overview</div><div class="state-grid">', unsafe_allow_html=True)
     state_html = ""
     for i, s in enumerate(STATES):
         active = "active" if i == st.session_state.state else ""
-        state_html += f'<div class="state-item {active}"><div class="name">{s}</div><div class="id">S{i}</div></div>'
+        state_html += f'<div class="state-box {active}"><div class="name">{s}</div><div class="id">S{i}</div></div>'
     st.markdown(state_html + '</div></div>', unsafe_allow_html=True)
     
     # Three columns
-    c1, c2, c3 = st.columns([1, 1, 1.5])
+    c1, c2, c3 = st.columns([1, 1, 1.3])
     
     with c1:
-        st.markdown('<div class="card"><div class="card-title">📦 Registers</div><div class="reg-grid">', unsafe_allow_html=True)
+        st.markdown('<div class="content-card"><div class="card-title">📦 Registers</div><div class="reg-container">', unsafe_allow_html=True)
         reg_html = ""
         for i, v in enumerate(st.session_state.regs):
-            reg_html += f'<div class="reg-item"><div class="reg-label">R{i}</div><div class="reg-value">{v:02X}</div></div>'
+            reg_html += f'<div class="reg-box"><div class="reg-label">R{i}</div><div class="reg-value">{v:02X}</div></div>'
         st.markdown(reg_html + '</div></div>', unsafe_allow_html=True)
     
     with c2:
-        st.markdown('<div class="card"><div class="card-title">🎛️ Control Signals</div>', unsafe_allow_html=True)
+        st.markdown('<div class="content-card"><div class="card-title">🎛️ Control Signals</div>', unsafe_allow_html=True)
         for sig, val in st.session_state.signals.items():
             is_high = val == 1 or val in ['01', '10']
-            active = "active" if is_high else ""
-            high = "high" if is_high else ""
-            st.markdown(f'<div class="signal-item {active}"><span class="signal-name">{sig}</span><span class="signal-val {high}">{val}</span></div>', unsafe_allow_html=True)
+            high_class = "high" if is_high else ""
+            st.markdown(f'<div class="signal-row {high_class}"><span class="signal-name">{sig}</span><span class="signal-value {high_class}">{val}</span></div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with c3:
-        st.markdown('<div class="card"><div class="card-title">📝 Execution Log</div><div class="console">', unsafe_allow_html=True)
+        st.markdown('<div class="content-card"><div class="card-title">📝 Execution Log</div><div class="console-box">', unsafe_allow_html=True)
         log_html = ""
         for l in st.session_state.logs[-10:]:
             log_html += f'<div class="log-line log-{l["t"]}">[{l["c"]:02d}] {l["m"]}</div>'
@@ -547,7 +578,7 @@ with tab1:
     
     # Waveform
     if st.session_state.waveform:
-        st.markdown('<div class="card"><div class="card-title">📈 Signal Waveform</div>', unsafe_allow_html=True)
+        st.markdown('<div class="content-card"><div class="card-title">📈 Signal Waveform</div>', unsafe_allow_html=True)
         st.dataframe(pd.DataFrame(st.session_state.waveform[-10:]), use_container_width=True, hide_index=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -559,17 +590,17 @@ with tab2:
         
         The Control Unit is the brain of the processor:
         - **Fetches** instructions from memory
-        - **Decodes** the opcode to determine operation
-        - **Generates** control signals for datapath
-        - **Coordinates** ALU, registers, and memory
+        - **Decodes** the opcode
+        - **Generates** control signals
+        - **Coordinates** datapath components
         
-        ### 🔄 Moore FSM
+        ### 🔄 Moore FSM Model
         
         We use a **Moore Machine** where outputs depend only on current state:
         
         | Property | Description |
         |----------|-------------|
-        | Outputs | Based on state only |
+        | Outputs | State-based only |
         | Stability | Always stable |
         | Timing | Predictable |
         """)
@@ -590,7 +621,7 @@ with tab2:
         """)
 
 with tab3:
-    st.markdown("### Verilog Control Unit")
+    st.markdown("### Verilog Control Unit Implementation")
     st.code('''module control_unit (
     input clk, reset, start,
     input [2:0] opcode,
@@ -624,7 +655,7 @@ with tab3:
         endcase
     end
     
-    // Output logic (Moore)
+    // Moore output logic
     always @(*) begin
         {PCWrite, IRWrite, RegWrite, MemRead, MemWrite} = 0;
         case (state)
@@ -639,9 +670,13 @@ with tab4:
     st.markdown("### About This Project")
     st.markdown("""
     This mini-project demonstrates a **Finite State Machine-based Control Unit** 
-    for the DDCO course at Bangalore Institute of Technology.
+    for the DDCO course at **Bangalore Institute of Technology**.
     
-    **Features:** 8-state FSM • 8 instructions • Interactive web simulation • Verilog HDL
+    **Key Features:**
+    - 8-state Moore FSM
+    - 8 instructions (ADD, SUB, AND, OR, LOAD, STORE, BEQ, HALT)
+    - Interactive web simulation
+    - Complete Verilog HDL implementation
     """)
     
     st.markdown("### 👥 Team Members")
@@ -652,15 +687,15 @@ with tab4:
         ("Sartaj Ahmad S", "DIP 14", "🔧")
     ]):
         with col:
-            st.markdown(f'''<div class="team-item">
+            st.markdown(f'''<div class="team-card">
                 <div class="icon">{icon}</div>
                 <div class="name">{name}</div>
                 <div class="usn">{usn}</div>
             </div>''', unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown("**Guide:** Dr. Shilpa M • Assistant Professor, ISE Department")
-    st.markdown("**Institution:** Bangalore Institute of Technology")
+    st.markdown("**Project Guide:** Dr. Shilpa M — Assistant Professor, ISE Department")
+    st.markdown("**Institution:** Bangalore Institute of Technology • Academic Year 2024-25")
 
-# Init
+# Initialize
 if not st.session_state.logs: reset()
