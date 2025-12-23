@@ -4,102 +4,115 @@ import pandas as pd
 
 # Page Configuration
 st.set_page_config(
-    page_title="FSM Processor Control Unit",
+    page_title="FSM Processor Control Unit | DDCO Project",
     page_icon="⚙️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Clean, Professional CSS
+# Clean Light Theme CSS
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
     
-    * { font-family: 'Inter', sans-serif; }
+    /* Base styles */
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
     
     .stApp {
-        background: #0e1117;
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     }
+    
+    /* Hide Streamlit branding */
+    #MainMenu, footer, header {visibility: hidden;}
     
     /* Header */
-    .main-header {
-        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-        padding: 2rem 2.5rem;
+    .header {
+        background: white;
+        padding: 1.5rem 2rem;
         border-radius: 16px;
         margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        border: 1px solid #e2e8f0;
     }
     
-    .main-header h1 {
-        color: white;
-        font-size: 1.75rem;
+    .header h1 {
+        color: #1e293b;
+        font-size: 1.5rem;
         font-weight: 700;
         margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
-    .main-header p {
-        color: rgba(255,255,255,0.85);
-        margin: 0.5rem 0 0 0;
-        font-size: 0.95rem;
+    .header p {
+        color: #64748b;
+        margin: 0.25rem 0 0 0;
+        font-size: 0.9rem;
     }
     
     /* Cards */
     .card {
-        background: #1a1f2e;
+        background: white;
         border-radius: 12px;
         padding: 1.25rem;
-        border: 1px solid #2d3548;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1rem;
     }
     
-    .card-header {
-        color: #94a3b8;
+    .card-title {
+        color: #475569;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
     
-    /* State Grid */
+    /* State Grid - Responsive */
     .state-grid {
         display: grid;
-        grid-template-columns: repeat(8, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
         gap: 8px;
     }
     
-    .state-box {
-        background: #1e2433;
-        border: 2px solid #2d3548;
+    .state-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
         border-radius: 10px;
         padding: 12px 8px;
         text-align: center;
         transition: all 0.2s ease;
     }
     
-    .state-box.active {
-        background: linear-gradient(135deg, #10b981, #3b82f6);
-        border-color: #10b981;
-        transform: scale(1.02);
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    .state-item.active {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
     
-    .state-box .name {
-        color: #e2e8f0;
+    .state-item .name {
         font-size: 0.7rem;
         font-weight: 600;
+        color: #334155;
     }
     
-    .state-box.active .name {
+    .state-item.active .name {
         color: white;
     }
     
-    .state-box .id {
-        color: #64748b;
+    .state-item .id {
         font-size: 0.6rem;
+        color: #94a3b8;
         margin-top: 2px;
     }
     
-    .state-box.active .id {
+    .state-item.active .id {
         color: rgba(255,255,255,0.8);
     }
     
@@ -107,60 +120,61 @@ st.markdown("""
     .reg-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+        gap: 8px;
     }
     
-    .reg-box {
-        background: #1e2433;
-        border-radius: 10px;
-        padding: 14px;
+    .reg-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 12px;
         text-align: center;
-        border: 1px solid #2d3548;
+        border: 1px solid #e2e8f0;
     }
     
     .reg-label {
-        color: #64748b;
         font-size: 0.7rem;
+        color: #64748b;
         font-weight: 500;
     }
     
     .reg-value {
-        color: #3b82f6;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.5rem;
+        font-family: 'Fira Code', monospace;
+        font-size: 1.25rem;
         font-weight: 600;
+        color: #3b82f6;
         margin-top: 4px;
     }
     
     /* Signals */
-    .signal-row {
+    .signal-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 12px;
-        background: #1e2433;
-        border-radius: 8px;
-        margin-bottom: 6px;
-        border-left: 3px solid #2d3548;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-radius: 6px;
+        margin-bottom: 4px;
+        border-left: 3px solid #e2e8f0;
     }
     
-    .signal-row.active {
+    .signal-item.active {
         border-left-color: #10b981;
-        background: rgba(16, 185, 129, 0.1);
+        background: #ecfdf5;
     }
     
     .signal-name {
-        color: #94a3b8;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'Fira Code', monospace;
         font-size: 0.8rem;
+        color: #475569;
     }
     
     .signal-val {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.85rem;
-        padding: 3px 10px;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 2px 8px;
         border-radius: 4px;
-        background: #0e1117;
+        background: #e2e8f0;
         color: #64748b;
     }
     
@@ -171,14 +185,14 @@ st.markdown("""
     
     /* Console */
     .console {
-        background: #0a0d12;
+        background: #f8fafc;
         border-radius: 8px;
         padding: 12px;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'Fira Code', monospace;
         font-size: 0.75rem;
-        max-height: 200px;
+        max-height: 180px;
         overflow-y: auto;
-        border: 1px solid #1e2433;
+        border: 1px solid #e2e8f0;
     }
     
     .log-line { padding: 3px 0; color: #64748b; }
@@ -186,100 +200,136 @@ st.markdown("""
     .log-success { color: #10b981; }
     .log-warning { color: #f59e0b; }
     
-    /* Team */
-    .team-box {
-        background: #1e2433;
+    /* Team cards */
+    .team-item {
+        background: white;
         border-radius: 12px;
-        padding: 20px;
+        padding: 1.25rem;
         text-align: center;
-        border: 1px solid #2d3548;
-        transition: transform 0.2s ease;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
     }
     
-    .team-box:hover {
+    .team-item:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         transform: translateY(-2px);
     }
     
-    .team-box .icon { font-size: 2.5rem; margin-bottom: 10px; }
-    .team-box .name { color: #e2e8f0; font-weight: 600; font-size: 0.95rem; }
-    .team-box .usn { color: #64748b; font-size: 0.8rem; margin-top: 4px; }
+    .team-item .icon { font-size: 2rem; margin-bottom: 8px; }
+    .team-item .name { font-weight: 600; color: #1e293b; font-size: 0.9rem; }
+    .team-item .usn { color: #64748b; font-size: 0.8rem; margin-top: 4px; }
     
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+        background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
-        padding: 0.6rem 1rem !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.85rem !important;
         transition: all 0.2s ease !important;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2) !important;
     }
     
     .stButton > button:hover {
         transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35) !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
     }
     
-    /* Metrics in sidebar */
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background: white !important;
+        border-right: 1px solid #e2e8f0 !important;
+    }
+    
+    [data-testid="stSidebar"] .block-container {
+        padding: 1rem !important;
+    }
+    
+    /* Selectbox */
+    .stSelectbox > div > div {
+        background: white !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Metrics */
     [data-testid="stMetricValue"] {
-        font-family: 'JetBrains Mono', monospace;
-        color: #3b82f6;
+        font-family: 'Fira Code', monospace !important;
+        color: #3b82f6 !important;
     }
     
-    /* Section titles */
-    .section-title {
-        color: #e2e8f0;
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
+        background: white;
+        padding: 8px;
+        border-radius: 10px;
     }
     
-    /* Table styling */
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Table */
     .dataframe {
-        font-family: 'JetBrains Mono', monospace !important;
+        font-family: 'Fira Code', monospace !important;
         font-size: 0.8rem !important;
+    }
+    
+    /* Status badge */
+    .status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-badge.active {
+        background: #dbeafe;
+        color: #1d4ed8;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
-if 'current_state' not in st.session_state:
-    st.session_state.current_state = 0
+# Session State
+if 'state' not in st.session_state:
+    st.session_state.state = 0
 if 'cycle' not in st.session_state:
     st.session_state.cycle = 0
 if 'logs' not in st.session_state:
     st.session_state.logs = []
-if 'registers' not in st.session_state:
-    st.session_state.registers = [15, 25, 0, 0]
+if 'regs' not in st.session_state:
+    st.session_state.regs = [15, 25, 0, 0]
 if 'pc' not in st.session_state:
     st.session_state.pc = 0
 if 'signals' not in st.session_state:
     st.session_state.signals = {'PCWrite': 0, 'IRWrite': 0, 'MemRead': 0, 'MemWrite': 0, 'RegWrite': 0, 'ALUOp': '00'}
-if 'waveform_data' not in st.session_state:
-    st.session_state.waveform_data = []
+if 'waveform' not in st.session_state:
+    st.session_state.waveform = []
 
-# Constants
 STATES = ['IDLE', 'FETCH', 'DECODE', 'EXE_ALU', 'EXE_MEM', 'EXE_BR', 'WB', 'HALT']
-INSTRUCTIONS = {'ADD': '000', 'SUB': '001', 'AND': '010', 'OR': '011', 'LOAD': '100', 'STORE': '101', 'BEQ': '110', 'HALT': '111'}
+INSTR = {'ADD': '000', 'SUB': '001', 'AND': '010', 'OR': '011', 'LOAD': '100', 'STORE': '101', 'BEQ': '110', 'HALT': '111'}
 
-def add_log(msg, t='info'):
-    st.session_state.logs.append({'cycle': st.session_state.cycle, 'msg': msg, 'type': t})
+def log(msg, t='info'):
+    st.session_state.logs.append({'c': st.session_state.cycle, 'm': msg, 't': t})
 
 def reset():
-    st.session_state.current_state = 0
+    st.session_state.state = 0
     st.session_state.cycle = 0
     st.session_state.logs = []
-    st.session_state.registers = [15, 25, 0, 0]
+    st.session_state.regs = [15, 25, 0, 0]
     st.session_state.pc = 0
     st.session_state.signals = {'PCWrite': 0, 'IRWrite': 0, 'MemRead': 0, 'MemWrite': 0, 'RegWrite': 0, 'ALUOp': '00'}
-    st.session_state.waveform_data = []
-    add_log("Processor reset", 'success')
+    st.session_state.waveform = []
+    log("Reset complete", 'success')
 
-def get_next(op):
-    s = st.session_state.current_state
+def next_state(op):
+    s = st.session_state.state
     if s == 0: return 1
     if s == 1: return 2
     if s == 2:
@@ -291,15 +341,15 @@ def get_next(op):
     if s == 6: return 1
     return s
 
-def apply_signals(op):
+def apply(op):
     st.session_state.signals = {'PCWrite': 0, 'IRWrite': 0, 'MemRead': 0, 'MemWrite': 0, 'RegWrite': 0, 'ALUOp': '00'}
-    s = st.session_state.current_state
+    s = st.session_state.state
+    r = st.session_state.regs
     if s == 1:
         st.session_state.signals.update({'MemRead': 1, 'IRWrite': 1, 'PCWrite': 1})
         st.session_state.pc += 1
     elif s == 3:
         st.session_state.signals['ALUOp'] = '10'
-        r = st.session_state.registers
         if op == '000': r[2] = (r[0] + r[1]) & 0xFF
         elif op == '001': r[2] = (r[0] - r[1]) & 0xFF
         elif op == '010': r[2] = r[0] & r[1]
@@ -307,7 +357,7 @@ def apply_signals(op):
     elif s == 4:
         if op == '100':
             st.session_state.signals['MemRead'] = 1
-            st.session_state.registers[0] = 42
+            r[0] = 42
         else:
             st.session_state.signals['MemWrite'] = 1
     elif s == 5:
@@ -317,7 +367,7 @@ def apply_signals(op):
             st.session_state.signals['RegWrite'] = 1
         st.session_state.signals['PCWrite'] = 1
     
-    st.session_state.waveform_data.append({
+    st.session_state.waveform.append({
         'Cycle': st.session_state.cycle,
         'State': STATES[s],
         'PCWrite': st.session_state.signals['PCWrite'],
@@ -326,85 +376,81 @@ def apply_signals(op):
     })
 
 def step(op):
-    name = [k for k,v in INSTRUCTIONS.items() if v == op][0]
-    add_log(f"{STATES[st.session_state.current_state]} → {name}")
-    apply_signals(op)
-    if st.session_state.current_state == 6:
-        add_log(f"{name} done", 'success')
-    nxt = get_next(op)
-    if nxt == 7 and st.session_state.current_state != 7:
-        add_log("HALTED", 'warning')
-    st.session_state.current_state = nxt
+    name = [k for k,v in INSTR.items() if v == op][0]
+    log(f"{STATES[st.session_state.state]} → {name}")
+    apply(op)
+    if st.session_state.state == 6:
+        log(f"{name} completed", 'success')
+    nxt = next_state(op)
+    if nxt == 7 and st.session_state.state != 7:
+        log("Processor halted", 'warning')
+    st.session_state.state = nxt
     st.session_state.cycle += 1
 
-# FSM Diagram Component
-def fsm_diagram_html():
-    current = st.session_state.current_state
+# FSM Diagram - Clean Light Theme
+def fsm_svg():
+    c = st.session_state.state
+    active = lambda i: "url(#activeGrad)" if i == c else "#f8fafc"
+    stroke = lambda i: "#3b82f6" if i == c else "#cbd5e1"
+    text_c = lambda i: "white" if i == c else "#475569"
+    
     return f'''
-    <div style="background: #1a1f2e; border-radius: 16px; padding: 20px; border: 1px solid #2d3548;">
-        <svg viewBox="0 0 700 380" style="width: 100%; height: auto;">
+    <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; overflow: auto;">
+        <svg viewBox="0 0 650 320" style="width: 100%; min-width: 500px; height: auto; display: block;">
             <defs>
-                <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                    <polygon points="0 0, 8 3, 0 6" fill="#4b5563"/>
+                <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/>
                 </marker>
                 <linearGradient id="activeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#10b981"/>
-                    <stop offset="100%" style="stop-color:#3b82f6"/>
+                    <stop offset="0%" style="stop-color:#3b82f6"/>
+                    <stop offset="100%" style="stop-color:#2563eb"/>
                 </linearGradient>
             </defs>
             
             <!-- Arrows -->
-            <path d="M 350 70 L 200 120" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 200 160 L 350 160 L 500 160" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 480 180 L 120 230" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 500 180 L 280 230" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 520 180 L 420 230" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 540 180 L 580 230" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 120 290 L 320 330" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 280 290 L 340 330" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 420 290 L 370 330" fill="none" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
-            <path d="M 300 350 Q 80 300 180 180" fill="none" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow)"/>
-            
-            <!-- State: IDLE -->
-            <circle cx="350" cy="50" r="35" fill="{'url(#activeGrad)' if current==0 else '#1e2433'}" stroke="{'#10b981' if current==0 else '#2d3548'}" stroke-width="2"/>
-            <text x="350" y="50" fill="{'white' if current==0 else '#94a3b8'}" font-size="11" font-weight="600" text-anchor="middle" dominant-baseline="middle">IDLE</text>
-            
-            <!-- State: FETCH -->
-            <circle cx="180" cy="150" r="35" fill="{'url(#activeGrad)' if current==1 else '#1e2433'}" stroke="{'#10b981' if current==1 else '#2d3548'}" stroke-width="2"/>
-            <text x="180" y="150" fill="{'white' if current==1 else '#94a3b8'}" font-size="11" font-weight="600" text-anchor="middle" dominant-baseline="middle">FETCH</text>
-            
-            <!-- State: DECODE -->
-            <circle cx="520" cy="150" r="35" fill="{'url(#activeGrad)' if current==2 else '#1e2433'}" stroke="{'#10b981' if current==2 else '#2d3548'}" stroke-width="2"/>
-            <text x="520" y="150" fill="{'white' if current==2 else '#94a3b8'}" font-size="10" font-weight="600" text-anchor="middle" dominant-baseline="middle">DECODE</text>
-            
-            <!-- State: EXE_ALU -->
-            <circle cx="100" cy="260" r="35" fill="{'url(#activeGrad)' if current==3 else '#1e2433'}" stroke="{'#10b981' if current==3 else '#2d3548'}" stroke-width="2"/>
-            <text x="100" y="260" fill="{'white' if current==3 else '#94a3b8'}" font-size="9" font-weight="600" text-anchor="middle" dominant-baseline="middle">EXE_ALU</text>
-            
-            <!-- State: EXE_MEM -->
-            <circle cx="260" cy="260" r="35" fill="{'url(#activeGrad)' if current==4 else '#1e2433'}" stroke="{'#10b981' if current==4 else '#2d3548'}" stroke-width="2"/>
-            <text x="260" y="260" fill="{'white' if current==4 else '#94a3b8'}" font-size="9" font-weight="600" text-anchor="middle" dominant-baseline="middle">EXE_MEM</text>
-            
-            <!-- State: EXE_BR -->
-            <circle cx="420" cy="260" r="35" fill="{'url(#activeGrad)' if current==5 else '#1e2433'}" stroke="{'#10b981' if current==5 else '#2d3548'}" stroke-width="2"/>
-            <text x="420" y="260" fill="{'white' if current==5 else '#94a3b8'}" font-size="9" font-weight="600" text-anchor="middle" dominant-baseline="middle">EXE_BR</text>
-            
-            <!-- State: HALT -->
-            <circle cx="580" cy="260" r="35" fill="{'url(#activeGrad)' if current==7 else '#1e2433'}" stroke="{'#f59e0b' if current==7 else '#2d3548'}" stroke-width="2"/>
-            <text x="580" y="260" fill="{'white' if current==7 else '#94a3b8'}" font-size="11" font-weight="600" text-anchor="middle" dominant-baseline="middle">HALT</text>
-            
-            <!-- State: WRITEBACK -->
-            <circle cx="350" cy="350" r="35" fill="{'url(#activeGrad)' if current==6 else '#1e2433'}" stroke="{'#10b981' if current==6 else '#2d3548'}" stroke-width="2"/>
-            <text x="350" y="350" fill="{'white' if current==6 else '#94a3b8'}" font-size="10" font-weight="600" text-anchor="middle" dominant-baseline="middle">WB</text>
+            <path d="M 325 55 L 170 95" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 170 135 L 480 135" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 460 155 L 100 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 480 155 L 250 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 500 155 L 380 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 520 155 L 550 195" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 100 255 L 300 280" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 250 255 L 310 280" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 380 255 L 340 280" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 280 295 Q 60 260 150 155" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arr)"/>
             
             <!-- Labels -->
-            <text x="270" y="95" fill="#64748b" font-size="8">start</text>
-            <text x="340" y="145" fill="#64748b" font-size="8">always</text>
-            <text x="280" y="205" fill="#64748b" font-size="7">ALU</text>
-            <text x="370" y="205" fill="#64748b" font-size="7">MEM</text>
-            <text x="460" y="205" fill="#64748b" font-size="7">BR</text>
-            <text x="560" y="205" fill="#64748b" font-size="7">HALT</text>
-            <text x="120" y="305" fill="#64748b" font-size="7">loop</text>
+            <text x="240" y="70" fill="#94a3b8" font-size="9" font-family="Inter">start</text>
+            <text x="310" y="125" fill="#94a3b8" font-size="8" font-family="Inter">always</text>
+            <text x="250" y="175" fill="#94a3b8" font-size="7" font-family="Inter">ALU</text>
+            <text x="340" y="175" fill="#94a3b8" font-size="7" font-family="Inter">MEM</text>
+            <text x="430" y="175" fill="#94a3b8" font-size="7" font-family="Inter">BR</text>
+            <text x="530" y="175" fill="#94a3b8" font-size="7" font-family="Inter">HALT</text>
+            
+            <!-- States -->
+            <circle cx="325" cy="35" r="28" fill="{active(0)}" stroke="{stroke(0)}" stroke-width="2"/>
+            <text x="325" y="38" fill="{text_c(0)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">IDLE</text>
+            
+            <circle cx="150" cy="120" r="28" fill="{active(1)}" stroke="{stroke(1)}" stroke-width="2"/>
+            <text x="150" y="123" fill="{text_c(1)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">FETCH</text>
+            
+            <circle cx="500" cy="120" r="28" fill="{active(2)}" stroke="{stroke(2)}" stroke-width="2"/>
+            <text x="500" y="123" fill="{text_c(2)}" font-size="9" font-weight="600" text-anchor="middle" font-family="Inter">DECODE</text>
+            
+            <circle cx="80" cy="225" r="28" fill="{active(3)}" stroke="{stroke(3)}" stroke-width="2"/>
+            <text x="80" y="228" fill="{text_c(3)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter">EXE_ALU</text>
+            
+            <circle cx="230" cy="225" r="28" fill="{active(4)}" stroke="{stroke(4)}" stroke-width="2"/>
+            <text x="230" y="228" fill="{text_c(4)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter">EXE_MEM</text>
+            
+            <circle cx="380" cy="225" r="28" fill="{active(5)}" stroke="{stroke(5)}" stroke-width="2"/>
+            <text x="380" y="228" fill="{text_c(5)}" font-size="8" font-weight="600" text-anchor="middle" font-family="Inter">EXE_BR</text>
+            
+            <circle cx="550" cy="225" r="28" fill="{active(7)}" stroke="{'#f59e0b' if c==7 else '#cbd5e1'}" stroke-width="2"/>
+            <text x="550" y="228" fill="{text_c(7)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">HALT</text>
+            
+            <circle cx="325" cy="295" r="28" fill="{active(6)}" stroke="{stroke(6)}" stroke-width="2"/>
+            <text x="325" y="298" fill="{text_c(6)}" font-size="10" font-weight="600" text-anchor="middle" font-family="Inter">WB</text>
         </svg>
     </div>
     '''
@@ -413,7 +459,7 @@ def fsm_diagram_html():
 
 # Header
 st.markdown("""
-<div class="main-header">
+<div class="header">
     <h1>⚙️ FSM Processor Control Unit</h1>
     <p>Interactive Finite State Machine Simulator • DDCO Mini Project</p>
 </div>
@@ -421,20 +467,20 @@ st.markdown("""
 
 # Sidebar
 with st.sidebar:
-    st.markdown("### 🎛️ Control Panel")
+    st.markdown("### 🎛️ Controls")
     
-    instruction = st.selectbox("Instruction", list(INSTRUCTIONS.keys()), format_func=lambda x: f"{x} ({INSTRUCTIONS[x]})")
-    opcode = INSTRUCTIONS[instruction]
+    instr = st.selectbox("Instruction", list(INSTR.keys()), format_func=lambda x: f"{x} ({INSTR[x]})")
+    op = INSTR[instr]
     
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("⏭️ Step", use_container_width=True): step(opcode)
+        if st.button("⏭️ Step", use_container_width=True): step(op)
     with c2:
         if st.button("🔄 Reset", use_container_width=True): reset()
     
-    if st.button("▶️ Run Full Cycle", use_container_width=True):
+    if st.button("▶️ Run Cycle", use_container_width=True):
         for _ in range(6):
-            if st.session_state.current_state != 7: step(opcode)
+            if st.session_state.state != 7: step(op)
     
     st.markdown("---")
     st.markdown("### 📊 Status")
@@ -442,12 +488,9 @@ with st.sidebar:
     c1.metric("Cycles", st.session_state.cycle)
     c2.metric("PC", f"0x{st.session_state.pc:02X}")
     
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 12px; border-radius: 8px; text-align: center; margin-top: 10px;">
-        <div style="color: rgba(255,255,255,0.8); font-size: 0.7rem;">Current State</div>
-        <div style="color: white; font-size: 1.1rem; font-weight: 700;">{STATES[st.session_state.current_state]}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'''<div style="text-align:center; margin-top:8px;">
+        <span class="status-badge active">{STATES[st.session_state.state]}</span>
+    </div>''', unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown("### 👥 Team")
@@ -455,101 +498,99 @@ with st.sidebar:
     st.caption("**Rohit Maiya M** • 1BI24IS131")
     st.caption("**Sartaj Ahmad S** • DIP 14")
     st.markdown("---")
-    st.caption("**Guide:** Dr. Shilpa M")
-    st.caption("ISE Department")
+    st.caption("**Guide:** Dr. Shilpa M • ISE Dept")
 
 # Tabs
 tab1, tab2, tab3, tab4 = st.tabs(["🔄 Simulator", "📚 Theory", "💻 Code", "📝 About"])
 
 with tab1:
     # FSM Diagram
-    st.markdown('<div class="section-title">🔄 FSM State Diagram</div>', unsafe_allow_html=True)
-    components.html(fsm_diagram_html(), height=420)
+    st.markdown('<div class="card"><div class="card-title">🔄 FSM State Diagram</div>', unsafe_allow_html=True)
+    components.html(fsm_svg(), height=360, scrolling=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # State boxes
-    st.markdown('<div class="section-title">📊 States</div>', unsafe_allow_html=True)
-    state_html = '<div class="state-grid">'
+    # States row
+    st.markdown('<div class="card"><div class="card-title">📊 Current States</div><div class="state-grid">', unsafe_allow_html=True)
+    state_html = ""
     for i, s in enumerate(STATES):
-        active = "active" if i == st.session_state.current_state else ""
-        state_html += f'<div class="state-box {active}"><div class="name">{s}</div><div class="id">S{i}</div></div>'
-    state_html += '</div>'
-    st.markdown(state_html, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
+        active = "active" if i == st.session_state.state else ""
+        state_html += f'<div class="state-item {active}"><div class="name">{s}</div><div class="id">S{i}</div></div>'
+    st.markdown(state_html + '</div></div>', unsafe_allow_html=True)
     
     # Three columns
     c1, c2, c3 = st.columns([1, 1, 1.5])
     
     with c1:
-        st.markdown('<div class="section-title">📦 Registers</div>', unsafe_allow_html=True)
-        reg_html = '<div class="reg-grid">'
-        for i, v in enumerate(st.session_state.registers):
-            reg_html += f'<div class="reg-box"><div class="reg-label">R{i}</div><div class="reg-value">{v:02X}</div></div>'
-        reg_html += '</div>'
-        st.markdown(reg_html, unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-title">📦 Registers</div><div class="reg-grid">', unsafe_allow_html=True)
+        reg_html = ""
+        for i, v in enumerate(st.session_state.regs):
+            reg_html += f'<div class="reg-item"><div class="reg-label">R{i}</div><div class="reg-value">{v:02X}</div></div>'
+        st.markdown(reg_html + '</div></div>', unsafe_allow_html=True)
     
     with c2:
-        st.markdown('<div class="section-title">🎛️ Signals</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-title">🎛️ Control Signals</div>', unsafe_allow_html=True)
         for sig, val in st.session_state.signals.items():
             is_high = val == 1 or val in ['01', '10']
             active = "active" if is_high else ""
             high = "high" if is_high else ""
-            st.markdown(f'''<div class="signal-row {active}">
-                <span class="signal-name">{sig}</span>
-                <span class="signal-val {high}">{val}</span>
-            </div>''', unsafe_allow_html=True)
+            st.markdown(f'<div class="signal-item {active}"><span class="signal-name">{sig}</span><span class="signal-val {high}">{val}</span></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with c3:
-        st.markdown('<div class="section-title">📝 Log</div>', unsafe_allow_html=True)
-        log_html = '<div class="console">'
+        st.markdown('<div class="card"><div class="card-title">📝 Execution Log</div><div class="console">', unsafe_allow_html=True)
+        log_html = ""
         for l in st.session_state.logs[-10:]:
-            log_html += f'<div class="log-line log-{l["type"]}">[{l["cycle"]:02d}] {l["msg"]}</div>'
+            log_html += f'<div class="log-line log-{l["t"]}">[{l["c"]:02d}] {l["m"]}</div>'
         if not st.session_state.logs:
-            log_html += '<div class="log-line">Ready...</div>'
-        log_html += '</div>'
-        st.markdown(log_html, unsafe_allow_html=True)
+            log_html = '<div class="log-line">Ready to execute...</div>'
+        st.markdown(log_html + '</div></div>', unsafe_allow_html=True)
     
     # Waveform
-    if st.session_state.waveform_data:
-        st.markdown('<div class="section-title">📈 Waveform</div>', unsafe_allow_html=True)
-        st.dataframe(pd.DataFrame(st.session_state.waveform_data[-10:]), use_container_width=True, hide_index=True)
+    if st.session_state.waveform:
+        st.markdown('<div class="card"><div class="card-title">📈 Signal Waveform</div>', unsafe_allow_html=True)
+        st.dataframe(pd.DataFrame(st.session_state.waveform[-10:]), use_container_width=True, hide_index=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with tab2:
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("""
-        ### 🧠 Control Unit
-        The Control Unit orchestrates instruction execution by:
-        - **Fetching** instructions from memory
-        - **Decoding** the opcode
-        - **Generating** control signals
-        - **Coordinating** datapath components
+        ### 🧠 What is a Control Unit?
         
-        ### 🔄 FSM Approach
+        The Control Unit is the brain of the processor:
+        - **Fetches** instructions from memory
+        - **Decodes** the opcode to determine operation
+        - **Generates** control signals for datapath
+        - **Coordinates** ALU, registers, and memory
+        
+        ### 🔄 Moore FSM
+        
         We use a **Moore Machine** where outputs depend only on current state:
         
-        | Property | Moore | Mealy |
-        |----------|-------|-------|
-        | Outputs | State only | State + Input |
-        | Stability | Stable | May glitch |
+        | Property | Description |
+        |----------|-------------|
+        | Outputs | Based on state only |
+        | Stability | Always stable |
+        | Timing | Predictable |
         """)
     with c2:
         st.markdown("""
         ### 📋 Instruction Set
         
-        | Op | Instr | Operation |
-        |----|-------|-----------|
+        | Opcode | Instruction | Operation |
+        |--------|-------------|-----------|
         | 000 | ADD | Rd ← Rs + Rt |
         | 001 | SUB | Rd ← Rs - Rt |
         | 010 | AND | Rd ← Rs & Rt |
         | 011 | OR | Rd ← Rs \\| Rt |
-        | 100 | LOAD | Rd ← Mem |
-        | 101 | STORE | Mem ← Rs |
-        | 110 | BEQ | Branch |
-        | 111 | HALT | Stop |
+        | 100 | LOAD | Rd ← Memory |
+        | 101 | STORE | Memory ← Rs |
+        | 110 | BEQ | Branch if equal |
+        | 111 | HALT | Stop processor |
         """)
 
 with tab3:
+    st.markdown("### Verilog Control Unit")
     st.code('''module control_unit (
     input clk, reset, start,
     input [2:0] opcode,
@@ -557,14 +598,17 @@ with tab3:
     output reg MemRead, MemWrite,
     output reg [1:0] ALUOp
 );
-    parameter IDLE=0, FETCH=1, DECODE=2, 
+    // State encoding
+    parameter IDLE=0, FETCH=1, DECODE=2,
               EXE_ALU=3, EXE_MEM=4, WB=6, HALT=7;
     
     reg [2:0] state, next;
     
+    // State register
     always @(posedge clk or posedge reset)
         state <= reset ? IDLE : next;
     
+    // Next state logic
     always @(*) begin
         case (state)
             IDLE: next = start ? FETCH : IDLE;
@@ -573,34 +617,34 @@ with tab3:
                 3'b000,3'b001,3'b010,3'b011: next = EXE_ALU;
                 3'b100,3'b101: next = EXE_MEM;
                 3'b111: next = HALT;
-                default: next = FETCH;
             endcase
-            EXE_ALU,EXE_MEM: next = WB;
+            EXE_ALU, EXE_MEM: next = WB;
             WB: next = FETCH;
             HALT: next = HALT;
         endcase
     end
     
+    // Output logic (Moore)
     always @(*) begin
-        {PCWrite,IRWrite,RegWrite,MemRead,MemWrite} = 0;
+        {PCWrite, IRWrite, RegWrite, MemRead, MemWrite} = 0;
         case (state)
-            FETCH: {PCWrite,IRWrite,MemRead} = 3'b111;
+            FETCH: {PCWrite, IRWrite, MemRead} = 3'b111;
             EXE_ALU: ALUOp = 2'b10;
-            WB: {PCWrite,RegWrite} = 2'b11;
+            WB: {PCWrite, RegWrite} = 2'b11;
         endcase
     end
 endmodule''', language='verilog')
 
 with tab4:
-    st.markdown("### 📝 About")
+    st.markdown("### About This Project")
     st.markdown("""
-    This project demonstrates a **Finite State Machine-based Control Unit** 
+    This mini-project demonstrates a **Finite State Machine-based Control Unit** 
     for the DDCO course at Bangalore Institute of Technology.
     
-    **Features:** 8-state FSM • 8 instructions • Interactive simulation • Verilog code
+    **Features:** 8-state FSM • 8 instructions • Interactive web simulation • Verilog HDL
     """)
     
-    st.markdown("### 👥 Team")
+    st.markdown("### 👥 Team Members")
     c1, c2, c3 = st.columns(3)
     for col, (name, usn, icon) in zip([c1,c2,c3], [
         ("Vignesh B S", "1BI24IS187", "🎯"),
@@ -608,14 +652,15 @@ with tab4:
         ("Sartaj Ahmad S", "DIP 14", "🔧")
     ]):
         with col:
-            st.markdown(f'''<div class="team-box">
+            st.markdown(f'''<div class="team-item">
                 <div class="icon">{icon}</div>
                 <div class="name">{name}</div>
                 <div class="usn">{usn}</div>
             </div>''', unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown("**Guide:** Dr. Shilpa M • ISE Department")
+    st.markdown("**Guide:** Dr. Shilpa M • Assistant Professor, ISE Department")
+    st.markdown("**Institution:** Bangalore Institute of Technology")
 
 # Init
 if not st.session_state.logs: reset()
