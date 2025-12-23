@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSM Processor Control Unit Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 2px solid #00d4ff;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #00d4ff, #00ff88, #00d4ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .header p {
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(0,212,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        /* FSM Diagram */
+        .fsm-container {
+            position: relative;
+            height: 500px;
+        }
+
+        .state-node {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #444;
+            background: rgba(30,30,50,0.9);
+        }
+
+        .state-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0,212,255,0.5);
+        }
+
+        .state-node.active {
+            border-color: #00ff88;
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+            color: #000;
+            animation: pulse 0.5s ease;
+            box-shadow: 0 0 40px rgba(0,255,136,0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .state-node span {
+            font-size: 0.65rem;
+            opacity: 0.7;
+        }
+
+        /* State positions */
+        #state-idle { top: 50px; left: 50%; transform: translateX(-50%); }
+        #state-fetch { top: 150px; left: 30%; }
+        #state-decode { top: 150px; right: 30%; }
+        #state-alu { top: 280px; left: 10%; }
+        #state-mem { top: 280px; left: 40%; }
+        #state-branch { top: 280px; right: 10%; }
+        #state-wb { top: 400px; left: 50%; transform: translateX(-50%); }
+        #state-halt { top: 280px; right: 35%; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00d4ff;
+            font-size: 0.9rem;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        select {
+            background: #1a1a2e;
+            color: #fff;
+            border: 1px solid #00d4ff;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+            color: #000;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,212,255,0.4);
+        }
+
+        button:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Signals Display */
+        .signals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .signal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .signal-name {
+            color: #888;
+        }
+
+        .signal-value {
+            font-family: 'Consolas', monospace;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #1a1a2e;
+        }
+
+        .signal-value.high {
+            background: #00ff88;
+            color: #000;
+        }
+
+        /* Register Display */
+        .registers {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .register {
+            background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        .register-name {
+            font-size: 0.8rem;
+            color: #00d4ff;
+        }
+
+        .register-value {
+            font-size: 1.5rem;
+            font-family: 'Consolas', monospace;
+            margin-top: 5px;
+        }
+
+        /* Console Log */
+        .console {
+            background: #0a0a15;
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            border: 1px solid #333;
+        }
+
+        .console-line {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .console-line.info { color: #00d4ff; }
+        .console-line.success { color: #00ff88; }
+        .console-line.warning { color: #ffaa00; }
+        .console-line.error { color: #ff4444; }
+
+        /* Waveform */
+        .waveform-container {
+            background: #0a0a15;
+            border-radius: 10px;
+            padding: 15px;
+            overflow-x: auto;
+        }
+
+        .waveform-row {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding: 5px 0;
+        }
+
+        .waveform-label {
+            width: 80px;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .waveform-signals {
+            display: flex;
+            flex: 1;
+        }
+
+        .waveform-cell {
+            width: 30px;
+            height: 20px;
+            border-right: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .waveform-cell.high {
+            background: rgba(0,255,136,0.3);
+            color: #00ff88;
+        }
+
+        .waveform-cell.state {
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            font-size: 0.6rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .authors {
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 FSM Processor Control Unit Simulator</h1>
+        <p>Digital Design and Computer Organization (DDCO) Mini Project</p>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Panel - Controls -->
+        <div class="controls">
+            <div class="panel">
+                <h2>⚙️ Processor Controls</h2>
+                <div class="control-group">
+                    <label>Select Instruction:</label>
+                    <select id="instruction-select">
+                        <option value="000">ADD - Addition</option>
+                        <option value="001">SUB - Subtraction</option>
+                        <option value="010">AND - Bitwise AND</option>
+                        <option value="011">OR - Bitwise OR</option>
+                        <option value="100">LOAD - Load from Memory</option>
+                        <option value="101">STORE - Store to Memory</option>
+                        <option value="110">BEQ - Branch if Equal</option>
+                        <option value="111">HALT - Stop Execution</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button id="btn-step">⏭️ Step</button>
+                    <button id="btn-run">▶️ Run</button>
+                </div>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button id="btn-reset">🔄 Reset</button>
+                    <button id="btn-auto">🔁 Auto Demo</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📊 Registers</h2>
+                <div class="registers">
+                    <div class="register">
+                        <div class="register-name">R0</div>
+                        <div class="register-value" id="reg-r0">00</div>
+                    </div>
+                    <div class="register">
+                        <div class="register-name">R1</div>
+                        <div class="register-value" id="reg-r1">00</div>
+                    </div>
+                    <div class="register">
+                        <div class="register-name">R2</div>
+                        <div class="register-value" id="reg-r2">00</div>
+                    </div>
+                    <div class="register">
+                        <div class="register-name">R3</div>
+                        <div class="register-value" id="reg-r3">00</div>
+                    </div>
+                </div>
+                <div class="registers" style="margin-top: 10px;">
+                    <div class="register" style="grid-column: span 2;">
+                        <div class="register-name">PC</div>
+                        <div class="register-value" id="reg-pc">00</div>
+                    </div>
+                    <div class="register" style="grid-column: span 2;">
+                        <div class="register-name">IR</div>
+                        <div class="register-value" id="reg-ir">000</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🎛️ Control Signals</h2>
+                <div class="signals-grid">
+                    <div class="signal">
+                        <span class="signal-name">PCWrite</span>
+                        <span class="signal-value" id="sig-pcwrite">0</span>
+                    </div>
+                    <div class="signal">
+                        <span class="signal-name">IRWrite</span>
+                        <span class="signal-value" id="sig-irwrite">0</span>
+                    </div>
+                    <div class="signal">
+                        <span class="signal-name">MemRead</span>
+                        <span class="signal-value" id="sig-memread">0</span>
+                    </div>
+                    <div class="signal">
+                        <span class="signal-name">MemWrite</span>
+                        <span class="signal-value" id="sig-memwrite">0</span>
+                    </div>
+                    <div class="signal">
+                        <span class="signal-name">RegWrite</span>
+                        <span class="signal-value" id="sig-regwrite">0</span>
+                    </div>
+                    <div class="signal">
+                        <span class="signal-name">ALUOp</span>
+                        <span class="signal-value" id="sig-aluop">00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - FSM & Waveform -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="panel">
+                <h2>🔄 FSM State Diagram</h2>
+                <div class="fsm-container">
+                    <svg style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
+                        <!-- Arrows will be drawn here -->
+                    </svg>
+                    <div class="state-node active" id="state-idle">
+                        IDLE<span>S0</span>
+                    </div>
+                    <div class="state-node" id="state-fetch">
+                        FETCH<span>S1</span>
+                    </div>
+                    <div class="state-node" id="state-decode">
+                        DECODE<span>S2</span>
+                    </div>
+                    <div class="state-node" id="state-alu">
+                        EXEC_ALU<span>S3</span>
+                    </div>
+                    <div class="state-node" id="state-mem">
+                        EXEC_MEM<span>S4</span>
+                    </div>
+                    <div class="state-node" id="state-branch">
+                        EXEC_BR<span>S5</span>
+                    </div>
+                    <div class="state-node" id="state-wb">
+                        WRITEBACK<span>S6</span>
+                    </div>
+                    <div class="state-node" id="state-halt">
+                        HALT<span>S7</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📈 Simulation Waveform</h2>
+                <div class="waveform-container" id="waveform">
+                    <!-- Waveform will be generated here -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📝 Execution Log</h2>
+                <div class="console" id="console"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Created by <span class="authors">Vignesh B S (1BI24IS187) & Rohit Maiya M (1BI24IS131)</span></p>
+        <p>Guide: Dr. Shilpa M | Department of Information Science and Engineering</p>
+    </div>
+
+    <script>
+        // FSM Simulator Logic
+        const states = ['IDLE', 'FETCH', 'DECODE', 'EXEC_ALU', 'EXEC_MEM', 'EXEC_BR', 'WRITEBACK', 'HALT'];
+        const stateIds = ['idle', 'fetch', 'decode', 'alu', 'mem', 'branch', 'wb', 'halt'];
+        
+        let currentState = 0;
+        let cycle = 0;
+        let running = false;
+        let waveformData = [];
+        let registers = [0, 0, 0, 0];
+        let pc = 0;
+        let ir = '000';
+
+        const opcodeNames = {
+            '000': 'ADD', '001': 'SUB', '010': 'AND', '011': 'OR',
+            '100': 'LOAD', '101': 'STORE', '110': 'BEQ', '111': 'HALT'
+        };
+
+        function log(msg, type = 'info') {
+            const console = document.getElementById('console');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = `[${cycle.toString().padStart(3, '0')}] ${msg}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function setSignal(id, value) {
+            const el = document.getElementById(id);
+            el.textContent = value;
+            el.className = 'signal-value' + (value === '1' || value === '10' || value === '01' ? ' high' : '');
+        }
+
+        function clearSignals() {
+            setSignal('sig-pcwrite', '0');
+            setSignal('sig-irwrite', '0');
+            setSignal('sig-memread', '0');
+            setSignal('sig-memwrite', '0');
+            setSignal('sig-regwrite', '0');
+            setSignal('sig-aluop', '00');
+        }
+
+        function setActiveState(stateIndex) {
+            document.querySelectorAll('.state-node').forEach((el, i) => {
+                el.classList.toggle('active', i === stateIndex);
+            });
+        }
+
+        function updateRegisters() {
+            document.getElementById('reg-r0').textContent = registers[0].toString(16).toUpperCase().padStart(2, '0');
+            document.getElementById('reg-r1').textContent = registers[1].toString(16).toUpperCase().padStart(2, '0');
+            document.getElementById('reg-r2').textContent = registers[2].toString(16).toUpperCase().padStart(2, '0');
+            document.getElementById('reg-r3').textContent = registers[3].toString(16).toUpperCase().padStart(2, '0');
+            document.getElementById('reg-pc').textContent = pc.toString(16).toUpperCase().padStart(2, '0');
+            document.getElementById('reg-ir').textContent = ir;
+        }
+
+        function getNextState(opcode) {
+            switch(currentState) {
+                case 0: return 1; // IDLE -> FETCH
+                case 1: return 2; // FETCH -> DECODE
+                case 2: // DECODE -> based on opcode
+                    if (opcode === '000' || opcode === '001' || opcode === '010' || opcode === '011') return 3; // ALU
+                    if (opcode === '100' || opcode === '101') return 4; // MEM
+                    if (opcode === '110') return 5; // BRANCH
+                    if (opcode === '111') return 7; // HALT
+                    return 1;
+                case 3: return 6; // EXEC_ALU -> WRITEBACK
+                case 4: return 6; // EXEC_MEM -> WRITEBACK
+                case 5: return 6; // EXEC_BR -> WRITEBACK
+                case 6: return 1; // WRITEBACK -> FETCH
+                case 7: return 7; // HALT stays
+                default: return 0;
+            }
+        }
+
+        function applySignals(opcode) {
+            clearSignals();
+            
+            switch(currentState) {
+                case 1: // FETCH
+                    setSignal('sig-memread', '1');
+                    setSignal('sig-irwrite', '1');
+                    setSignal('sig-pcwrite', '1');
+                    ir = opcode;
+                    pc++;
+                    break;
+                case 3: // EXEC_ALU
+                    setSignal('sig-aluop', '10');
+                    // Simulate ALU operation
+                    switch(opcode) {
+                        case '000': registers[2] = (registers[0] + registers[1]) & 0xFF; break;
+                        case '001': registers[2] = (registers[0] - registers[1]) & 0xFF; break;
+                        case '010': registers[2] = registers[0] & registers[1]; break;
+                        case '011': registers[2] = registers[0] | registers[1]; break;
+                    }
+                    break;
+                case 4: // EXEC_MEM
+                    if (opcode === '100') {
+                        setSignal('sig-memread', '1');
+                        registers[0] = Math.floor(Math.random() * 50) + 10;
+                    } else {
+                        setSignal('sig-memwrite', '1');
+                    }
+                    break;
+                case 5: // EXEC_BR
+                    setSignal('sig-aluop', '01');
+                    if (registers[0] === registers[1]) {
+                        pc = (pc + 2) & 0xFF;
+                    }
+                    break;
+                case 6: // WRITEBACK
+                    if (opcode !== '101' && opcode !== '110' && opcode !== '111') {
+                        setSignal('sig-regwrite', '1');
+                    }
+                    setSignal('sig-pcwrite', '1');
+                    break;
+            }
+            
+            updateRegisters();
+        }
+
+        function recordWaveform() {
+            waveformData.push({
+                cycle: cycle,
+                state: states[currentState],
+                pcwrite: document.getElementById('sig-pcwrite').textContent,
+                irwrite: document.getElementById('sig-irwrite').textContent,
+                memread: document.getElementById('sig-memread').textContent,
+                regwrite: document.getElementById('sig-regwrite').textContent
+            });
+            renderWaveform();
+        }
+
+        function renderWaveform() {
+            const container = document.getElementById('waveform');
+            const recent = waveformData.slice(-15);
+            
+            let html = `
+                <div class="waveform-row">
+                    <div class="waveform-label">Cycle</div>
+                    <div class="waveform-signals">${recent.map(d => `<div class="waveform-cell">${d.cycle}</div>`).join('')}</div>
+                </div>
+                <div class="waveform-row">
+                    <div class="waveform-label">State</div>
+                    <div class="waveform-signals">${recent.map(d => `<div class="waveform-cell state">${d.state.slice(0,4)}</div>`).join('')}</div>
+                </div>
+                <div class="waveform-row">
+                    <div class="waveform-label">PCWrite</div>
+                    <div class="waveform-signals">${recent.map(d => `<div class="waveform-cell ${d.pcwrite === '1' ? 'high' : ''}">${d.pcwrite}</div>`).join('')}</div>
+                </div>
+                <div class="waveform-row">
+                    <div class="waveform-label">IRWrite</div>
+                    <div class="waveform-signals">${recent.map(d => `<div class="waveform-cell ${d.irwrite === '1' ? 'high' : ''}">${d.irwrite}</div>`).join('')}</div>
+                </div>
+                <div class="waveform-row">
+                    <div class="waveform-label">MemRead</div>
+                    <div class="waveform-signals">${recent.map(d => `<div class="waveform-cell ${d.memread === '1' ? 'high' : ''}">${d.memread}</div>`).join('')}</div>
+                </div>
+                <div class="waveform-row">
+                    <div class="waveform-label">RegWrite</div>
+                    <div class="waveform-signals">${recent.map(d => `<div class="waveform-cell ${d.regwrite === '1' ? 'high' : ''}">${d.regwrite}</div>`).join('')}</div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function step() {
+            const opcode = document.getElementById('instruction-select').value;
+            
+            log(`State: ${states[currentState]} | Opcode: ${opcodeNames[opcode]}`, 
+                currentState === 7 ? 'warning' : 'info');
+            
+            applySignals(opcode);
+            recordWaveform();
+            
+            const nextState = getNextState(opcode);
+            
+            if (currentState === 6) {
+                log(`Instruction ${opcodeNames[opcode]} completed!`, 'success');
+            }
+            
+            if (nextState === 7 && currentState !== 7) {
+                log('Processor HALTED!', 'error');
+            }
+            
+            currentState = nextState;
+            setActiveState(currentState);
+            cycle++;
+        }
+
+        function reset() {
+            currentState = 0;
+            cycle = 0;
+            running = false;
+            registers = [15, 25, 0, 0]; // Initialize with sample values
+            pc = 0;
+            ir = '000';
+            waveformData = [];
+            
+            setActiveState(0);
+            clearSignals();
+            updateRegisters();
+            renderWaveform();
+            
+            document.getElementById('console').innerHTML = '';
+            log('Processor RESET - Ready to execute', 'success');
+            log('R0=15, R1=25 (Sample operands loaded)', 'info');
+        }
+
+        async function run() {
+            running = true;
+            document.getElementById('btn-run').disabled = true;
+            
+            while (running && currentState !== 7 && cycle < 50) {
+                step();
+                await new Promise(r => setTimeout(r, 400));
+            }
+            
+            running = false;
+            document.getElementById('btn-run').disabled = false;
+        }
+
+        async function autoDemo() {
+            reset();
+            await new Promise(r => setTimeout(r, 500));
+            
+            log('=== AUTO DEMO: Testing all instructions ===', 'success');
+            
+            const instructions = ['000', '001', '010', '011', '100', '101', '111'];
+            
+            for (const instr of instructions) {
+                if (currentState === 7) break;
+                
+                document.getElementById('instruction-select').value = instr;
+                log(`--- Testing ${opcodeNames[instr]} ---`, 'warning');
+                
+                // Run until we're back at FETCH or HALT
+                let startCycle = cycle;
+                while (currentState !== 1 && currentState !== 7 && cycle - startCycle < 10) {
+                    step();
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('btn-step').addEventListener('click', step);
+        document.getElementById('btn-run').addEventListener('click', run);
+        document.getElementById('btn-reset').addEventListener('click', reset);
+        document.getElementById('btn-auto').addEventListener('click', autoDemo);
+
+        // Initialize
+        reset();
+    </script>
+</body>
+</html>
